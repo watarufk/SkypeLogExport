@@ -3,10 +3,51 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ConversionFromSQLiteDbSchemeToCSharpCode"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        xmlns:local="clr-namespace:ConversionFromSQLiteDbSchemeToCSharpCode" mc:Ignorable="d"
+        Title="Conversion from SQLite DB File to CSharp Code" Width="640" Height="480">
+    <Window.Resources>
+        <Style TargetType="{x:Type GroupBox}">
+            <Setter Property="Foreground" Value="Blue" />
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="SQLite DB File Path">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" x:Name="SelectDbFileButton" Content="Select" HorizontalAlignment="Center"
+                        Height="30" Padding="15,0" Margin="5,0,0,0" />
+                <TextBox Text="{Binding DataBaseFilePath}" IsReadOnly="True" />
+            </DockPanel>
+        </GroupBox>
+
+        <UniformGrid Grid.Row="1" Columns="2">
+            <GroupBox Header="Namespace Name">
+                <TextBox Text="{Binding NamespaceName}" />
+            </GroupBox>
+            <GroupBox Header="DataSet Class Name">
+                <TextBox Text="{Binding DataSetClassName}" />
+            </GroupBox>
+        </UniformGrid>
+
+        <GroupBox Grid.Row="2" Header="Conversion Result">
+            <DockPanel>
+                <WrapPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right">
+                    <Button x:Name="SaveCodeButton" Content="Save Code" HorizontalAlignment="Center" Height="30"
+                            Padding="15,0" Margin="10,5,0,5" />
+                </WrapPanel>
+                <TextBox Text="{Binding ConversionResult, Mode=OneWay}" VerticalContentAlignment="Top" Height="Auto"
+                        VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" IsReadOnly="True" />
+            </DockPanel>
+        </GroupBox>
     </Grid>
 </Window>
