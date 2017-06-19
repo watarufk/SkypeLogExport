@@ -150,7 +150,9 @@
                 AppendLineToPocoCode("{", 0);
                 AppendLineToPocoCode("using System;", 1);
                 AppendLineToPocoCode("using System.Collections.Generic;", 1);
-                AppendLineToPocoCode("using System.Linq;", 1);
+                AppendLineToPocoCode("using System.Data.SQLite;", 1);
+                AppendLineToPocoCode("using System.Data.Linq;", 1);
+                AppendLineToPocoCode("using System.Data.Linq.Mapping;", 1);
                 // Required
                 AppendLineToPocoCode("using System.ComponentModel.DataAnnotations;", 1);
                 // DataContract, DataMember
@@ -159,11 +161,13 @@
                 foreach (var tableInfo in TableInfoList)
                 {
                     AppendLineToPocoCode("", 0);
+                    AppendLineToPocoCode("[Table]", 1);
                     AppendLineToPocoCode("[DataContract]", 1);
                     AppendLineToPocoCode($"public class {tableInfo.TableName}", 1);
                     AppendLineToPocoCode("{", 1);
                     foreach (var columnInfo in tableInfo.ColumnInfoList)
                     {
+                        AppendLineToPocoCode(columnInfo.ClrAttributeAsString, 2);
                         AppendLineToPocoCode(columnInfo.ClrAttributeAsString, 2);
                         AppendLineToPocoCode(columnInfo.PropertyString, 2);
                     }
@@ -172,7 +176,7 @@
 
                 AppendLineToPocoCode("", 0);
                 AppendLineToPocoCode("[DataContract]", 1);
-                AppendLineToPocoCode($"public class {DataSetClassName}", 1);
+                AppendLineToPocoCode($"public class {DataSetClassName} : System.Data.Linq.DataContext", 1);
                 AppendLineToPocoCode("{", 1);
                 foreach (var tableInfo in TableInfoList)
                 {

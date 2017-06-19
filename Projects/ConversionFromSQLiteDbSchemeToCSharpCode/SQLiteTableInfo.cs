@@ -38,6 +38,16 @@
         public long pk { get; set; }
 
         public bool IsRequired { get { return (notnull != 0) || (pk != 0); } }
+        public string SQLiteClassAttributeAsString
+        {
+            get
+            {
+                var ret = "[Column";
+                if (IsRequired) { ret += ", Required"; }
+                ret += "]";
+                return ret;
+            }
+        }
         public string ClrAttributeAsString
         {
             get

@@ -84,10 +84,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="ConversionFromSQLiteDbSchemeToCSharpCodeApp.xaml.cs">
-      <DependentUpon>ConversionFromSQLiteDbSchemeToCSharpCodeApp.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ConversionFromSQLiteDbSchemeToCSharpCodeMainWindow.xaml.cs">
       <DependentUpon>ConversionFromSQLiteDbSchemeToCSharpCodeMainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
