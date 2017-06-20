@@ -8,23 +8,22 @@
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Foreground" Value="Blue" />
         </Style>
-        <Style TargetType="{x:Type TextBox}">
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Height" Value="30" />
-        </Style>
+        <BooleanToVisibilityConverter x:Key="TrueToVisibleFalseToCollapsedConverter" />
+        <local:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <GroupBox Grid.Row="0" Header="Skype DB File Path">
             <DockPanel>
                 <Button DockPanel.Dock="Right" x:Name="SelectDbFileButton" Content="Select" HorizontalAlignment="Center"
                         Height="30" Padding="15,0" Margin="5,0,0,0" />
-                <TextBox Text="{Binding SkypeMainDbFilePath}" IsReadOnly="True" />
+                <TextBox Text="{Binding SkypeMainDbFilePath}" IsReadOnly="True" VerticalContentAlignment="Center" />
             </DockPanel>
         </GroupBox>
 
@@ -32,22 +31,83 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Chat Group List">
-                <DockPanel>
-                    <TextBox Text="{Binding DataBaseFilePath}" IsReadOnly="True" />
-                </DockPanel>
+                <ListBox ItemsSource="{Binding ExportingChannels}" SelectedItem="{Binding CurrentSelectedChannel}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <CheckBox IsChecked="{Binding IsExporting}" Content="{Binding Channel.DisplayName}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </GroupBox>
 
-            <Separator Grid.Column="1" />
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
-            <GroupBox Grid.Column="2" Header="Chat Contents">
-                <DockPanel>
-                    <TextBox Text="{Binding DataBaseFilePath}" IsReadOnly="True" />
-                </DockPanel>
-            </GroupBox>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="3*" />
+                </Grid.RowDefinitions>
+
+                <GroupBox Grid.Row="0" Header="Person List">
+                    <ListBox ItemsSource="{Binding CurrentSelectedChannelPersonList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
+
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
+
+                <GroupBox Grid.Row="2" Header="Message List">
+                    <ListBox ItemsSource="{Binding CurrentSelectedChannelMessageList}"
+                            HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="[From]: " />
+                                            <TextBlock Text="{Binding Author.DisplayName}" />
+                                            <TextBlock
+                                                    Text="{Binding Timestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}"
+                                                    Margin="10,0,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal"
+                                                Visibility="{Binding HasEdited, Converter={StaticResource TrueToVisibleFalseToCollapsedConverter}}"
+                                                Margin="20,0,0,0">
+                                            <TextBlock Text="[Edited]: " />
+                                            <TextBlock Text="{Binding EditedBy.DisplayName}" />
+                                            <TextBlock
+                                                    Text="{Binding EditedTimestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}"
+                                                    Margin="10,0,0,0" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="2" Text="{Binding Body}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </GroupBox>
+            </Grid>
         </Grid>
+
+        <GroupBox Grid.Row="2" Header="Commands">
+
+        </GroupBox>
     </Grid>
 </Window>

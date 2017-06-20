@@ -15,7 +15,11 @@
         [DataMember]
         public string Identity { get; set; }
         [DataMember]
-        public string Name { get; set; }
+        public string FirstName { get; set; }
+        [DataMember]
+        public string LastName { get; set; }
+        [DataMember]
+        public string FullName { get; set; }
         [DataMember]
         public string DisplayName { get; set; }
     }
@@ -29,13 +33,17 @@
         public string Channel_Identity { get; set; }
         [DataMember]
         public string Identity { get; set; }
-        [DataMember]
-        public DateTime Timestamp { get; set; }
 
         [DataMember]
-        public string EditedBy_Person_Identity { get; set; }
+        public DateTime Timestamp { get; set; }
+        [DataMember]
+        public Person Author { get; set; }
+
         [DataMember]
         public DateTime? EditedTimestamp { get; set; }
+        public bool HasEdited { get { return EditedTimestamp.HasValue; } }
+        [DataMember]
+        public Person EditedBy { get; set; }
 
         [DataMember]
         public string Body { get; set; }

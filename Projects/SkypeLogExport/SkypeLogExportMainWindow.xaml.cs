@@ -26,12 +26,12 @@
             Model = new SkypeLogExportModel();
             this.DataContext = Model;
 
-            Model.TryUpdateSkypeMainDbPath();
+            Model.TryUpdateSkypeMainDbPathAndConvertData();
 
             SelectDbFileButton.Click += delegate
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog();
-                Model.TryUpdateSkypeMainDbPath();
+                Model.TryUpdateSkypeMainDbPathAndConvertData();
                 ofd.InitialDirectory = Model.SkypeDataFolderPath;
                 ofd.FileName = System.IO.Path.GetFileName(Model.SkypeMainDbFilePath);
                 ofd.Filter = "SQLite DB File|*.db";
