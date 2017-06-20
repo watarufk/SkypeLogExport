@@ -37,17 +37,19 @@
         public object dflt_value { get; set; }
         public long pk { get; set; }
 
-        public bool IsRequired { get { return (notnull != 0) || (pk != 0); } }
-        public string SQLiteClassAttributeAsString
+        public string SQLiteAttributeAsString
         {
             get
             {
-                var ret = "[Column";
-                if (IsRequired) { ret += ", Required"; }
-                ret += "]";
+                var ret = $"[Column(Name = \"{name}\"";
+                if (pk != 0) { ret += ", IsPrimaryKey = true"; }
+                else if (notnull != 0) { ret += ", CanBeNull = false"; }
+                ret += ")]";
                 return ret;
             }
         }
+
+        public bool IsRequired { get { return (pk != 0) || (notnull != 0); } }
         public string ClrAttributeAsString
         {
             get
@@ -98,6 +100,17 @@
     public class SQLiteTableInfo
     {
         public string TableName { get; set; }
+        public string ClrClassName
+        {
+            get
+            {
+                var ret = TableName;
+                if (CSharpNotation.CSharpKeywords.Any(e => e == TableName)) { ret = "@" + TableName; }
+                if (CSharpNotation.CSharpContextualKeywords.Any(e => e == TableName)) { ret = "@" + TableName; }
+                return ret;
+            }
+        }
+
         public List<SQLiteColumnInfo> ColumnInfoList { get; set; }
 
         public SQLiteTableInfo()

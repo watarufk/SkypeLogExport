@@ -161,13 +161,13 @@
                 foreach (var tableInfo in TableInfoList)
                 {
                     AppendLineToPocoCode("", 0);
-                    AppendLineToPocoCode("[Table]", 1);
+                    AppendLineToPocoCode($"[Table(Name = \"{tableInfo.TableName}\")]", 1);
                     AppendLineToPocoCode("[DataContract]", 1);
-                    AppendLineToPocoCode($"public class {tableInfo.TableName}", 1);
+                    AppendLineToPocoCode($"public class {tableInfo.ClrClassName}", 1);
                     AppendLineToPocoCode("{", 1);
                     foreach (var columnInfo in tableInfo.ColumnInfoList)
                     {
-                        AppendLineToPocoCode(columnInfo.ClrAttributeAsString, 2);
+                        AppendLineToPocoCode(columnInfo.SQLiteAttributeAsString, 2);
                         AppendLineToPocoCode(columnInfo.ClrAttributeAsString, 2);
                         AppendLineToPocoCode(columnInfo.PropertyString, 2);
                     }
@@ -178,10 +178,13 @@
                 AppendLineToPocoCode("[DataContract]", 1);
                 AppendLineToPocoCode($"public class {DataSetClassName} : System.Data.Linq.DataContext", 1);
                 AppendLineToPocoCode("{", 1);
+                AppendLineToPocoCode($"public {DataSetClassName} (System.Data.IDbConnection fileOrServerOrConnection)", 2);
+                AppendLineToPocoCode(": base(fileOrServerOrConnection) { }", 3);
+                AppendLineToPocoCode("", 0);
                 foreach (var tableInfo in TableInfoList)
                 {
                     AppendLineToPocoCode("[DataMember]", 2);
-                    AppendLineToPocoCode($"public List<{tableInfo.TableName}> {tableInfo.TableName}List {{ get; set; }}", 2);
+                    AppendLineToPocoCode($"public List<{tableInfo.ClrClassName}> {tableInfo.ClrClassName}List {{ get; set; }}", 2);
                 }
                 AppendLineToPocoCode("}", 1);
                 AppendLineToPocoCode("}", 0);
