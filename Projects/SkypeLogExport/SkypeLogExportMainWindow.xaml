@@ -24,11 +24,11 @@
             <DockPanel>
                 <Button DockPanel.Dock="Right" x:Name="SelectDbFileButton" Content="Select" HorizontalAlignment="Center"
                         Height="30" Padding="15,0" Margin="5,0,0,0" />
-                <TextBox Text="{Binding DataBaseFilePath}" IsReadOnly="True" />
+                <TextBox Text="{Binding SkypeMainDbFilePath}" IsReadOnly="True" />
             </DockPanel>
         </GroupBox>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />

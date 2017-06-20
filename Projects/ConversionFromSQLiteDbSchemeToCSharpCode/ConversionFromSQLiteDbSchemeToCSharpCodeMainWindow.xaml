@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConversionFromSQLiteDbSchemeToCSharpCode" mc:Ignorable="d"
-        Title="Conversion from SQLite DB File to CSharp Code" Width="640" Height="480">
+        Title="Conversion from SQLite DB Scheme to CSharp Code" Width="640" Height="480">
     <Window.Resources>
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Foreground" Value="Blue" />

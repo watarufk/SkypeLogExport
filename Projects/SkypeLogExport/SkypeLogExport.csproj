@@ -87,6 +87,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="SkypeLogExportModel.cs" />
+    <Compile Include="ChatLogModel.cs" />
     <Compile Include="SkypeMainDbDataSet.cs" />
     <Page Include="SkypeLogExportMainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
