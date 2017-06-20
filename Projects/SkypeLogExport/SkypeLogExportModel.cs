@@ -35,18 +35,7 @@
         public string JsonDataString { get; private set; }
         public void UpdateJsonDataString(string dataBaseFilePath)
         {
-            JsonDataString = "";
-
-            using (var conn = new sds.SQLiteConnection("Data Source=" + dataBaseFilePath))
-            {
-                conn.Open();
-                using (var context = new System.Data.Linq.DataContext(conn))
-                {
-                    var conversations = context.GetTable<Conversations>();
-                    var messages = context.GetTable<Messages>();
-                }
-                conn.Close();
-            }
+            var data = SkypeMainDbDataSet.LoadDataFromFile(dataBaseFilePath);
         }
     }
 }

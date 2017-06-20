@@ -99,17 +99,18 @@
 
     public class SQLiteTableInfo
     {
-        public string TableName { get; set; }
-        public string ClrClassName
+        public string SQLiteTableName { get; set; }
+        public string ClrListObjectName
         {
             get
             {
-                var ret = TableName;
-                if (CSharpNotation.CSharpKeywords.Any(e => e == TableName)) { ret = "@" + TableName; }
-                if (CSharpNotation.CSharpContextualKeywords.Any(e => e == TableName)) { ret = "@" + TableName; }
+                var ret = SQLiteTableName;
+                if (CSharpNotation.CSharpKeywords.Any(e => e == SQLiteTableName)) { ret = "@" + SQLiteTableName; }
+                if (CSharpNotation.CSharpContextualKeywords.Any(e => e == SQLiteTableName)) { ret = "@" + SQLiteTableName; }
                 return ret;
             }
         }
+        public string ClrClassName { get { return ClrListObjectName + "Record"; } }
 
         public List<SQLiteColumnInfo> ColumnInfoList { get; set; }
 

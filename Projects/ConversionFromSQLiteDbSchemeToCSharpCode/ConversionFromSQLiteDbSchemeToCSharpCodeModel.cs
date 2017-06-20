@@ -90,7 +90,7 @@
                             while (getTableNamesReader.Read())
                             {
                                 var tableName = getTableNamesReader["tbl_name"].ToString();
-                                tableName_SQLiteTableInfo_Dict[tableName] = new SQLiteTableInfo() { TableName = tableName };
+                                tableName_SQLiteTableInfo_Dict[tableName] = new SQLiteTableInfo() { SQLiteTableName = tableName };
                             }
                         }
                     }
@@ -150,18 +150,19 @@
                 AppendLineToPocoCode("{", 0);
                 AppendLineToPocoCode("using System;", 1);
                 AppendLineToPocoCode("using System.Collections.Generic;", 1);
-                AppendLineToPocoCode("using System.Data.SQLite;", 1);
-                AppendLineToPocoCode("using System.Data.Linq;", 1);
+                // ToList()
+                AppendLineToPocoCode("using System.Linq;", 1);
+                // [Table], [Column] of SQLite
                 AppendLineToPocoCode("using System.Data.Linq.Mapping;", 1);
-                // Required
+                // [Required]
                 AppendLineToPocoCode("using System.ComponentModel.DataAnnotations;", 1);
-                // DataContract, DataMember
+                // [DataContract], [DataMember]
                 AppendLineToPocoCode("using System.Runtime.Serialization;", 1);
 
                 foreach (var tableInfo in TableInfoList)
                 {
                     AppendLineToPocoCode("", 0);
-                    AppendLineToPocoCode($"[Table(Name = \"{tableInfo.TableName}\")]", 1);
+                    AppendLineToPocoCode($"[Table(Name = \"{tableInfo.SQLiteTableName}\")]", 1);
                     AppendLineToPocoCode("[DataContract]", 1);
                     AppendLineToPocoCode($"public class {tableInfo.ClrClassName}", 1);
                     AppendLineToPocoCode("{", 1);
@@ -176,16 +177,34 @@
 
                 AppendLineToPocoCode("", 0);
                 AppendLineToPocoCode("[DataContract]", 1);
-                AppendLineToPocoCode($"public class {DataSetClassName} : System.Data.Linq.DataContext", 1);
+                AppendLineToPocoCode($"public class {DataSetClassName}", 1);
                 AppendLineToPocoCode("{", 1);
-                AppendLineToPocoCode($"public {DataSetClassName} (System.Data.IDbConnection fileOrServerOrConnection)", 2);
-                AppendLineToPocoCode(": base(fileOrServerOrConnection) { }", 3);
-                AppendLineToPocoCode("", 0);
+
                 foreach (var tableInfo in TableInfoList)
                 {
                     AppendLineToPocoCode("[DataMember]", 2);
-                    AppendLineToPocoCode($"public List<{tableInfo.ClrClassName}> {tableInfo.ClrClassName}List {{ get; set; }}", 2);
+                    AppendLineToPocoCode($"public List<{tableInfo.ClrClassName}> {tableInfo.ClrListObjectName} {{ get; set; }}", 2);
                 }
+
+                AppendLineToPocoCode($@"
+        public static {DataSetClassName} LoadDataFromFile(string dataBaseFilePath)
+        {{
+            var ret = new {DataSetClassName}();
+            using (var conn = new System.Data.SQLite.SQLiteConnection(""Data Source="" + dataBaseFilePath))
+            {{
+                conn.Open();
+                using (var reader = new System.Data.Linq.DataContext(conn))
+                {{", 0);
+                foreach (var tableInfo in TableInfoList)
+                {
+                    AppendLineToPocoCode($"ret.{tableInfo.ClrListObjectName} = reader.GetTable<{tableInfo.ClrClassName}>().ToList();", 5);
+                }
+                AppendLineToPocoCode($@"                }}
+                conn.Close();
+            }}
+            return ret;
+        }}", 0);
+
                 AppendLineToPocoCode("}", 1);
                 AppendLineToPocoCode("}", 0);
 
