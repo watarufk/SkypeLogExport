@@ -31,14 +31,30 @@
             SelectDbFileButton.Click += delegate
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog();
-                Model.TryUpdateSkypeMainDbPathAndConvertData();
                 ofd.InitialDirectory = Model.SkypeDataFolderPath;
                 ofd.FileName = System.IO.Path.GetFileName(Model.SkypeMainDbFilePath);
                 ofd.Filter = "SQLite DB File|*.db";
                 ofd.DefaultExt = ".db";
                 if (ofd.ShowDialog() != true) { return; }
-                ofd.InitialDirectory = Model.SkypeDataFolderPath;
                 Model.SkypeMainDbFilePath = ofd.FileName;
+            };
+
+            SaveAsTextLogButton.Click += delegate
+            {
+                var sfd = new Microsoft.Win32.SaveFileDialog();
+                sfd.Filter = "Text File|*.txt";
+                sfd.DefaultExt = ".txt";
+                if (sfd.ShowDialog() != true) { return; }
+                Model.SaveAsTextLog(sfd.FileName);
+            };
+
+            SaveAsJsonButton.Click += delegate
+            {
+                var sfd = new Microsoft.Win32.SaveFileDialog();
+                sfd.Filter = "JSON File|*.json";
+                sfd.DefaultExt = ".json";
+                if (sfd.ShowDialog() != true) { return; }
+                Model.SaveAsJson(sfd.FileName);
             };
         }
     }

@@ -10,7 +10,7 @@
     using System.Diagnostics;
     using sds = System.Data.SQLite;
 
-    public class ExportingChannelViewModel
+    public class ExportingChannel
     {
         public bool IsExporting { get; set; }
         public Channel Channel { get; set; }
@@ -18,7 +18,7 @@
 
     public enum ExportingMethod
     {
-        OneChannelInOneFile,
+        EachChannelInEachFile,
         AllChannelsInOneFile
     }
     public class EnumToBooleanConverter : System.Windows.Data.IValueConverter
@@ -49,48 +49,14 @@
             if (t != null) { t(this, new PropertyChangedEventArgs(propertyName)); }
         }
 
-        public string SkypeDataFolderPath { get; set; }
 
+        public string SkypeDataFolderPath { get; set; }
         string _SkypeMainDbFilePath;
         public string SkypeMainDbFilePath
         {
             get { return _SkypeMainDbFilePath; }
             set { _SkypeMainDbFilePath = value; OnPropertyChanged(nameof(SkypeMainDbFilePath)); }
         }
-        public SkypeMainDbDataSet SkypeMainDbDataSet { get; private set; }
-        public ChatLogModel ConversionResult { get; private set; }
-
-        public ExportingMethod ExportingMethod { get; set; }
-        public ObservableCollection<ExportingChannelViewModel> ExportingChannels { get; private set; }
-        ExportingChannelViewModel _CurrentSelectedChannel;
-        public ExportingChannelViewModel CurrentSelectedChannel
-        {
-            get { return _CurrentSelectedChannel; }
-            set
-            {
-                _CurrentSelectedChannel = value;
-                OnPropertyChanged(nameof(CurrentSelectedChannel));
-                OnPropertyChanged(nameof(CurrentSelectedChannelPersonList));
-                OnPropertyChanged(nameof(CurrentSelectedChannelMessageList));
-            }
-        }
-        public List<Person> CurrentSelectedChannelPersonList
-        {
-            get
-            {
-                if (_CurrentSelectedChannel == null) { return new List<Person>(); }
-                return _CurrentSelectedChannel.Channel.PersonList;
-            }
-        }
-        public List<Message> CurrentSelectedChannelMessageList
-        {
-            get
-            {
-                if (_CurrentSelectedChannel == null) { return new List<Message>(); }
-                return _CurrentSelectedChannel.Channel.MessageList;
-            }
-        }
-
         public bool TryUpdateSkypeMainDbPathAndConvertData()
         {
             SkypeDataFolderPath = "";
@@ -111,6 +77,8 @@
             return UpdateConversionResult();
         }
 
+
+        public SkypeMainDbDataSet SkypeMainDbDataSet { get; private set; }
         public bool UpdateSkypeData()
         {
             try
@@ -127,6 +95,8 @@
             }
         }
 
+
+        public ObservableCollection<ExportingChannel> ExportingChannels { get; private set; }
         public static DateTime? ConvertFromSQLiteTimestampToClrLocalDateTime(long? value)
         {
             if (value.HasValue == false) { return null; }
@@ -135,13 +105,11 @@
             var utcTime = epoch + elapsedSeconds;
             return utcTime.ToLocalTime();
         }
-
         public bool UpdateConversionResult()
         {
             try
             {
-                var newConversionResult = new SkypeLogExport.ChatLogModel();
-                newConversionResult.ChannelList = SkypeMainDbDataSet.Conversations.Select(e =>
+                var newChannelList = SkypeMainDbDataSet.Conversations.Select(e =>
                 {
                     var newChannel = new Channel();
                     newChannel.Id = e.id;
@@ -151,7 +119,7 @@
                     newChannel.Creator_Person_Identity = e.creator;
                     return newChannel;
                 }).ToList();
-                var ChannelId_Channel_Dict = newConversionResult.ChannelList.ToDictionary(e => e.Id);
+                var ChannelId_Channel_Dict = newChannelList.ToDictionary(e => e.Id);
 
                 var tempPersonList = SkypeMainDbDataSet.Contacts.Select(e => new Person()
                 {
@@ -194,22 +162,195 @@
                         }
                         newMessage.EditedTimestamp = ConvertFromSQLiteTimestampToClrLocalDateTime(e.edited_timestamp.Value);
                     }
-                    newMessage.Body = e.body_xml;
+
+                    {
+                        var tempString = e.body_xml;
+                        if (true)
+                        {
+                            var xd = new System.Xml.XmlDocument();
+                            xd.LoadXml($"<body>{tempString}</body>");
+                            // TODO: MUSTDO: check if it exports correct result or not when the e.body_xml contains XML documents
+                            tempString = xd.InnerText;
+                        }
+                        else if (false)
+                        {
+                            var re = new System.Text.RegularExpressions.Regex("<.*?>", System.Text.RegularExpressions.RegexOptions.Singleline);
+                            tempString = re.Replace(tempString, "");
+                            tempString = Uri.UnescapeDataString(tempString);
+                        }
+                        newMessage.Body = tempString;
+                    }
                     channel.MessageList.Add(newMessage);
                 }
-                newConversionResult.ChannelList = newConversionResult.ChannelList.Where(e => e.MessageList.Count > 0).ToList();
 
-                ConversionResult = newConversionResult;
-                OnPropertyChanged(nameof(ConversionResult));
-
-                var ec = ConversionResult.ChannelList.Select(e => new ExportingChannelViewModel()
+                var ec = newChannelList.Where(e => e.MessageList.Count > 0).Select(e => new ExportingChannel()
                 {
                     IsExporting = false,
                     Channel = e
                 });
-                ExportingChannels = new ObservableCollection<ExportingChannelViewModel>(ec);
+                ExportingChannels = new ObservableCollection<ExportingChannel>(ec);
                 OnPropertyChanged(nameof(ExportingChannels));
 
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
+                return false;
+            }
+        }
+
+
+        ExportingChannel _CurrentSelectedChannel;
+        public ExportingChannel CurrentSelectedChannel
+        {
+            get { return _CurrentSelectedChannel; }
+            set
+            {
+                _CurrentSelectedChannel = value;
+                OnPropertyChanged(nameof(CurrentSelectedChannel));
+                OnPropertyChanged(nameof(CurrentSelectedChannelPersonList));
+                OnPropertyChanged(nameof(CurrentSelectedChannelMessageList));
+                OnPropertyChanged(nameof(CurrentSelectedChannelMessageTextLog));
+                OnPropertyChanged(nameof(CurrentSelectedChannelMessageJson));
+            }
+        }
+        public List<Person> CurrentSelectedChannelPersonList
+        {
+            get
+            {
+                if (_CurrentSelectedChannel == null) { return new List<Person>(); }
+                return _CurrentSelectedChannel.Channel.PersonList;
+            }
+        }
+        public List<Message> CurrentSelectedChannelMessageList
+        {
+            get
+            {
+                if (_CurrentSelectedChannel == null) { return new List<Message>(); }
+                return _CurrentSelectedChannel.Channel.MessageList;
+            }
+        }
+        public static string GetTextLogFromMessage_01(Message msg)
+        {
+            var ret = $"[{msg.Timestamp:yyyy/MM/dd HH:mm:ss (zzz)}";
+            if (msg.HasEdited) { ret += $", [Edited] {msg.EditedTimestamp:yyyy/MM/dd HH:mm:ss (zzz)}"; }
+            ret += $"]\t{msg.Author.DisplayName}" + Environment.NewLine;
+            ret += msg.Body + Environment.NewLine;
+            return ret;
+        }
+        public static string GetTextLogFromMessageList(IList<Message> messages)
+        {
+            var sb = new StringBuilder();
+            foreach (var message in messages) { sb.AppendLine(GetTextLogFromMessage_01(message)); }
+            var ret = sb.ToString();
+            return ret;
+        }
+        public string CurrentSelectedChannelMessageTextLog
+        {
+            get { return GetTextLogFromMessageList(CurrentSelectedChannelMessageList); }
+        }
+        public static string GetJsonFromMessageList(IList<Message> messages)
+        {
+            var ret = Newtonsoft.Json.JsonConvert.SerializeObject(messages, Newtonsoft.Json.Formatting.Indented);
+            return ret;
+        }
+        public string CurrentSelectedChannelMessageJson
+        {
+            get { return GetJsonFromMessageList(CurrentSelectedChannelMessageList); }
+        }
+
+
+        public ExportingMethod ExportingMethod { get; set; } = ExportingMethod.EachChannelInEachFile;
+        public static string GetTextLogFromChannel(Channel channel)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("==============================");
+            sb.AppendLine($"[Channel]");
+            sb.AppendLine($"{channel.DisplayName}");
+            sb.AppendLine("");
+            sb.AppendLine("[People]");
+            foreach (var person in channel.PersonList) { sb.Append($"{person.DisplayName},"); }
+            sb.AppendLine();
+            sb.AppendLine("==============================");
+            sb.AppendLine(GetTextLogFromMessageList(channel.MessageList));
+            return sb.ToString();
+        }
+        public bool SaveAsTextLog(string filePath)
+        {
+            try
+            {
+                var folderPath = System.IO.Path.GetDirectoryName(filePath);
+                var fileNameBase = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                var channels = ExportingChannels.Where(e => e.IsExporting).Select(e => e.Channel);
+                switch (ExportingMethod)
+                {
+                    case ExportingMethod.EachChannelInEachFile:
+                        {
+                            foreach (var channel in channels)
+                            {
+                                var chName = channel.DisplayName;
+                                foreach (var c in System.IO.Path.GetInvalidFileNameChars()) { chName = chName.Replace(c.ToString(), "_"); }
+                                var path = System.IO.Path.Combine(folderPath, $"{fileNameBase}_{chName}.txt");
+                                var contents = GetTextLogFromChannel(channel);
+                                System.IO.File.WriteAllText(path, contents);
+                            }
+                        }
+                        break;
+                    case ExportingMethod.AllChannelsInOneFile:
+                        {
+                            var path = filePath;
+                            if (System.IO.File.Exists(path)) { System.IO.File.Delete(path); }
+                            foreach (var channel in channels)
+                            {
+                                var contents = GetTextLogFromChannel(channel) + Environment.NewLine + Environment.NewLine;
+                                System.IO.File.AppendAllText(path, contents);
+                            }
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
+                return false;
+            }
+        }
+        public bool SaveAsJson(string filePath)
+        {
+            try
+            {
+                var folderPath = System.IO.Path.GetDirectoryName(filePath);
+                var fileNameBase = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                var channels = ExportingChannels.Where(e => e.IsExporting).Select(e => e.Channel);
+                switch (ExportingMethod)
+                {
+                    case ExportingMethod.EachChannelInEachFile:
+                        {
+                            foreach (var channel in channels)
+                            {
+                                var chName = channel.DisplayName;
+                                foreach (var c in System.IO.Path.GetInvalidFileNameChars()) { chName = chName.Replace(c.ToString(), "_"); }
+                                var path = System.IO.Path.Combine(folderPath, $"{fileNameBase}_{chName}.json");
+                                var contents = Newtonsoft.Json.JsonConvert.SerializeObject(channel, Newtonsoft.Json.Formatting.Indented);
+                                System.IO.File.WriteAllText(path, contents);
+                            }
+                        }
+                        break;
+                    case ExportingMethod.AllChannelsInOneFile:
+                        {
+                            var path = filePath;
+                            if (System.IO.File.Exists(path)) { System.IO.File.Delete(path); }
+                            var contents = Newtonsoft.Json.JsonConvert.SerializeObject(channels, Newtonsoft.Json.Formatting.Indented);
+                            System.IO.File.WriteAllText(path, contents);
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
                 return true;
             }
             catch (Exception ex)

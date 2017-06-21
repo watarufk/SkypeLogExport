@@ -79,16 +79,4 @@
             MessageList = new List<Message>();
         }
     }
-
-    [DataContract]
-    public class ChatLogModel
-    {
-        [DataMember]
-        public List<Channel> ChannelList { get; set; }
-
-        public ChatLogModel()
-        {
-            ChannelList = new List<Channel>();
-        }
-    }
 }
