@@ -19,12 +19,17 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <GroupBox Grid.Row="0" Header="Skype DB File Path">
-            <DockPanel>
-                <Button DockPanel.Dock="Right" x:Name="SelectDbFileButton" Content="Select" HorizontalAlignment="Center"
-                        Height="30" Padding="15,0" Margin="5,0,0,0" />
-                <TextBox Text="{Binding SkypeMainDbFilePath}" IsReadOnly="True" VerticalContentAlignment="Center" />
-            </DockPanel>
+        <GroupBox Grid.Row="0" Header="Data Source File">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding SkypeMainDbFilePath}" IsReadOnly="True"
+                        VerticalContentAlignment="Center" />
+                <Button Grid.Column="1" x:Name="LoadSkypeMainDbFileButton" Content="Load Skype main.db File"
+                        HorizontalAlignment="Center" Height="30" Padding="15,0" Margin="5,0,0,0" />
+            </Grid>
         </GroupBox>
 
         <Grid Grid.Row="1">
@@ -34,14 +39,17 @@
                 <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
 
-            <GroupBox Grid.Column="0" Header="Chat Group List">
+            <GroupBox Grid.Column="0" Header="Channel List">
                 <ListBox ItemsSource="{Binding ExportingChannels}" SelectedItem="{Binding CurrentSelectedChannel}"
                         HorizontalContentAlignment="Stretch">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <DockPanel>
-                                <CheckBox IsChecked="{Binding IsExporting}" Content="{Binding Channel.DisplayName}" />
-                            </DockPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsExporting}" Content="{Binding Channel.Id}"
+                                        HorizontalContentAlignment="Right" MinWidth="50" />
+                                <TextBlock Text="{Binding Channel.DisplayName}" Margin="5,0" MinWidth="150" />
+                                <TextBlock Text="{Binding Channel.Identity}" Margin="10,0" />
+                            </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

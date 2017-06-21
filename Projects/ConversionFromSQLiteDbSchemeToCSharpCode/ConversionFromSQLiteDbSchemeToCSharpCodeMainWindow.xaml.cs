@@ -26,7 +26,7 @@
             Model = new ConversionFromSQLiteDbSchemeToCSharpCodeModel();
             this.DataContext = Model;
 
-            SelectDbFileButton.Click += delegate
+            LoadSQLiteDbFileButton.Click += delegate
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog();
                 ofd.InitialDirectory = System.Environment.GetFolderPath(Environment.SpecialFolder.Desktop);

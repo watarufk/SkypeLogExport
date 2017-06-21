@@ -28,7 +28,7 @@
 
             Model.TryUpdateSkypeMainDbPathAndConvertData();
 
-            SelectDbFileButton.Click += delegate
+            LoadSkypeMainDbFileButton.Click += delegate
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog();
                 ofd.InitialDirectory = Model.SkypeDataFolderPath;

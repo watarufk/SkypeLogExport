@@ -21,6 +21,7 @@
         EachChannelInEachFile,
         AllChannelsInOneFile
     }
+
     public class EnumToBooleanConverter : System.Windows.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -74,21 +75,18 @@
             SkypeDataFolderPath = newSkypeDataFolderPath;
             var mainDbPaths = System.IO.Directory.GetFiles(SkypeDataFolderPath, "main.db", System.IO.SearchOption.AllDirectories);
             if (mainDbPaths.Length == 0) { return false; }
-            _SkypeMainDbFilePath = mainDbPaths.FirstOrDefault();
-            OnPropertyChanged(nameof(SkypeMainDbFilePath));
-            if (UpdateSkypeData() == false) { return false; }
+            SkypeMainDbFilePath = mainDbPaths.FirstOrDefault();
+            if (UpdateSkypeMainDbDataSet() == false) { return false; }
             return UpdateConversionResult();
         }
 
 
         public SkypeMainDbDataSet SkypeMainDbDataSet { get; private set; }
-        public bool UpdateSkypeData()
+        public bool UpdateSkypeMainDbDataSet()
         {
             try
             {
-                var newSkypeMainDbDataSet = SkypeMainDbDataSet.LoadDataFromFile(SkypeMainDbFilePath);
-                SkypeMainDbDataSet = newSkypeMainDbDataSet;
-                OnPropertyChanged(nameof(SkypeMainDbDataSet));
+                SkypeMainDbDataSet = SkypeMainDbDataSet.LoadDataFromFile(SkypeMainDbFilePath);
                 return true;
             }
             catch (Exception ex)
@@ -99,7 +97,12 @@
         }
 
 
-        public ObservableCollection<ExportingChannel> ExportingChannels { get; private set; }
+        ObservableCollection<ExportingChannel> _ExportingChannels;
+        public ObservableCollection<ExportingChannel> ExportingChannels
+        {
+            get { return _ExportingChannels; }
+            private set { _ExportingChannels = value; OnPropertyChanged(nameof(ExportingChannels)); }
+        }
         public static DateTime? ConvertFromSQLiteTimestampToClrLocalDateTime(long? value)
         {
             if (value.HasValue == false) { return null; }
@@ -170,10 +173,17 @@
                         var tempString = e.body_xml;
                         if (true)
                         {
-                            var xd = new System.Xml.XmlDocument();
-                            xd.LoadXml($"<body>{tempString}</body>");
-                            // TODO: MUSTDO: check if it exports correct result or not when the e.body_xml contains XML documents
-                            tempString = xd.InnerText;
+                            try
+                            {
+                                var xd = new System.Xml.XmlDocument();
+                                xd.LoadXml($"<body>{tempString}</body>");
+                                // TODO: MUSTDO: check if it exports correct result or not when the e.body_xml contains XML documents
+                                tempString = xd.InnerText;
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Windows.MessageBox.Show(ex.Message);
+                            }
                         }
                         else if (false)
                         {
@@ -190,9 +200,8 @@
                 {
                     IsExporting = false,
                     Channel = e
-                });
+                }).OrderBy(e => e.Channel.DisplayName);
                 ExportingChannels = new ObservableCollection<ExportingChannel>(ec);
-                OnPropertyChanged(nameof(ExportingChannels));
 
                 return true;
             }
@@ -237,9 +246,12 @@
         public static string GetTextLogFromMessage_01(Message msg)
         {
             var ret = $"[{msg.Timestamp:yyyy/MM/dd HH:mm:ss (zzz)}";
-            if (msg.HasEdited) { ret += $", [Edited] {msg.EditedTimestamp:yyyy/MM/dd HH:mm:ss (zzz)}"; }
-            ret += $"]\t{msg.Author.DisplayName}" + Environment.NewLine;
-            ret += msg.Body + Environment.NewLine;
+            if (msg.EditedTimestamp.HasValue) { ret += $", [Edited] {msg.EditedTimestamp:yyyy/MM/dd HH:mm:ss (zzz)}"; }
+            ret += "]";
+            if (msg.Author != null) { ret += $"\t{msg.Author.DisplayName}"; }
+            ret += Environment.NewLine;
+            if (msg.Body != null) { ret += msg.Body; }
+            ret += Environment.NewLine;
             return ret;
         }
         public static string GetTextLogFromMessageList(IList<Message> messages)
@@ -272,17 +284,25 @@
         }
         public static string GetTextLogFromChannel(Channel channel)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("==============================");
-            sb.AppendLine($"[Channel]");
-            sb.AppendLine($"{channel.DisplayName}");
-            sb.AppendLine("");
-            sb.AppendLine("[People]");
-            foreach (var person in channel.PersonList) { sb.Append($"{person.DisplayName},"); }
-            sb.AppendLine();
-            sb.AppendLine("==============================");
-            sb.AppendLine(GetTextLogFromMessageList(channel.MessageList));
-            return sb.ToString();
+            try
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("==============================");
+                sb.AppendLine($"[Channel]");
+                sb.AppendLine($"{channel.DisplayName}");
+                sb.AppendLine("");
+                sb.AppendLine("[People]");
+                foreach (var person in channel.PersonList) { sb.Append($"{person.DisplayName},"); }
+                sb.AppendLine();
+                sb.AppendLine("==============================");
+                sb.AppendLine(GetTextLogFromMessageList(channel.MessageList));
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(ex.Message);
+                return "";
+            }
         }
         public bool SaveAsTextLog(string filePath)
         {

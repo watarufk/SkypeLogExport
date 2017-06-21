@@ -24,7 +24,7 @@
 
         <GroupBox Grid.Row="0" Header="SQLite DB File Path">
             <DockPanel>
-                <Button DockPanel.Dock="Right" x:Name="SelectDbFileButton" Content="Select" HorizontalAlignment="Center"
+                <Button DockPanel.Dock="Right" x:Name="LoadSQLiteDbFileButton" Content="Load SQLite DB File" HorizontalAlignment="Center"
                         Height="30" Padding="15,0" Margin="5,0,0,0" />
                 <TextBox Text="{Binding DataBaseFilePath}" IsReadOnly="True" />
             </DockPanel>
