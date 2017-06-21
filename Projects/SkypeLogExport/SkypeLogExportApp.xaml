@@ -1,0 +1,9 @@
+﻿<Application x:Class="SkypeLogExport.SkypeLogExportApp"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SkypeLogExport"
+             StartupUri="SkypeLogExportMainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
