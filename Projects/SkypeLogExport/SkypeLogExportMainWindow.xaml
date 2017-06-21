@@ -35,7 +35,8 @@
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Chat Group List">
-                <ListBox ItemsSource="{Binding ExportingChannels}" SelectedItem="{Binding CurrentSelectedChannel}">
+                <ListBox ItemsSource="{Binding ExportingChannels}" SelectedItem="{Binding CurrentSelectedChannel}"
+                        HorizontalContentAlignment="Stretch">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <DockPanel>
@@ -65,7 +66,9 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding DisplayName}" />
+                                <Border BorderThickness="1" BorderBrush="Blue" Background="AliceBlue">
+                                    <TextBlock Text="{Binding DisplayName}" Margin="5,3" />
+                                </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -77,36 +80,36 @@
                     <TabControl>
                         <TabItem Header="List" Padding="15,5">
                             <ListBox ItemsSource="{Binding CurrentSelectedChannelMessageList}"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                    HorizontalContentAlignment="Stretch">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,5">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="*" />
-                                            </Grid.RowDefinitions>
+                                        <Border BorderThickness="1" BorderBrush="Blue" Background="AliceBlue"
+                                                Margin="2,1">
+                                            <Grid Margin="2">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
 
-                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="[From]: " />
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                    <TextBlock Text="[" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock
+                                                                Text="{Binding Timestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}" />
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal"
+                                                            Visibility="{Binding HasEdited, Converter={StaticResource TrueToVisibleFalseToCollapsedConverter}}">
+                                                        <TextBlock Text=", [Edited] " />
+                                                        <TextBlock
+                                                                Text="{Binding EditedTimestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}" />
+                                                    </StackPanel>
+                                                    <TextBlock Text="]    " />
                                                     <TextBlock Text="{Binding Author.DisplayName}" />
-                                                    <TextBlock
-                                                            Text="{Binding Timestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}"
-                                                            Margin="10,0,0,0" />
                                                 </StackPanel>
-                                                <StackPanel Orientation="Horizontal"
-                                                        Visibility="{Binding HasEdited, Converter={StaticResource TrueToVisibleFalseToCollapsedConverter}}"
-                                                        Margin="20,0,0,0">
-                                                    <TextBlock Text="[Edited]: " />
-                                                    <TextBlock Text="{Binding EditedBy.DisplayName}" />
-                                                    <TextBlock
-                                                            Text="{Binding EditedTimestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss (zzz)}'}"
-                                                            Margin="10,0,0,0" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                            <TextBlock Grid.Row="2" Text="{Binding Body}" TextWrapping="Wrap" />
-                                        </Grid>
+                                                <TextBlock Grid.Row="1" Text="{Binding Body}" TextWrapping="Wrap" />
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -130,9 +133,9 @@
             <DockPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <RadioButton Content="Each Channel in Each File" Margin="10,5"
-                            IsChecked="{Binding ExportingMethod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=EachChannelInEachFile}" />
+                            IsChecked="{Binding CurrentExportingMethod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=EachChannelInEachFile}" />
                     <RadioButton Content="All Channels in One File" Margin="10,5"
-                            IsChecked="{Binding ExportingMethod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=AllChannelsInOneFile}" />
+                            IsChecked="{Binding CurrentExportingMethod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=AllChannelsInOneFile}" />
                 </StackPanel>
 
                 <WrapPanel HorizontalAlignment="Right" VerticalAlignment="Center">

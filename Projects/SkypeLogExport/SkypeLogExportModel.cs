@@ -50,6 +50,11 @@
         }
 
 
+        public SkypeLogExportModel()
+        {
+            CurrentExportingMethod = ExportingMethod.EachChannelInEachFile;
+        }
+
         public string SkypeDataFolderPath { get; set; }
         string _SkypeMainDbFilePath;
         public string SkypeMainDbFilePath
@@ -62,10 +67,8 @@
             SkypeDataFolderPath = "";
             SkypeMainDbFilePath = "";
             string newSkypeDataFolderPath = "";
-            if (false)
-                newSkypeDataFolderPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Skype");
-            else
-                newSkypeDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            newSkypeDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            if (false) { newSkypeDataFolderPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Skype"); }
 
             if (System.IO.Directory.Exists(newSkypeDataFolderPath) == false) { return false; }
             SkypeDataFolderPath = newSkypeDataFolderPath;
@@ -261,7 +264,12 @@
         }
 
 
-        public ExportingMethod ExportingMethod { get; set; } = ExportingMethod.EachChannelInEachFile;
+        ExportingMethod _CurrentExportingMethod;
+        public ExportingMethod CurrentExportingMethod
+        {
+            get { return _CurrentExportingMethod; }
+            set { _CurrentExportingMethod = value; OnPropertyChanged(nameof(CurrentExportingMethod)); }
+        }
         public static string GetTextLogFromChannel(Channel channel)
         {
             var sb = new StringBuilder();
@@ -283,7 +291,7 @@
                 var folderPath = System.IO.Path.GetDirectoryName(filePath);
                 var fileNameBase = System.IO.Path.GetFileNameWithoutExtension(filePath);
                 var channels = ExportingChannels.Where(e => e.IsExporting).Select(e => e.Channel);
-                switch (ExportingMethod)
+                switch (CurrentExportingMethod)
                 {
                     case ExportingMethod.EachChannelInEachFile:
                         {
@@ -325,12 +333,13 @@
             {
                 var folderPath = System.IO.Path.GetDirectoryName(filePath);
                 var fileNameBase = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                var channels = ExportingChannels.Where(e => e.IsExporting).Select(e => e.Channel);
-                switch (ExportingMethod)
+                var newChatLogModel = new ChatLogModel();
+                newChatLogModel.ChannelList = ExportingChannels.Where(e => e.IsExporting).Select(e => e.Channel).ToList();
+                switch (CurrentExportingMethod)
                 {
                     case ExportingMethod.EachChannelInEachFile:
                         {
-                            foreach (var channel in channels)
+                            foreach (var channel in newChatLogModel.ChannelList)
                             {
                                 var chName = channel.DisplayName;
                                 foreach (var c in System.IO.Path.GetInvalidFileNameChars()) { chName = chName.Replace(c.ToString(), "_"); }
@@ -344,7 +353,7 @@
                         {
                             var path = filePath;
                             if (System.IO.File.Exists(path)) { System.IO.File.Delete(path); }
-                            var contents = Newtonsoft.Json.JsonConvert.SerializeObject(channels, Newtonsoft.Json.Formatting.Indented);
+                            var contents = Newtonsoft.Json.JsonConvert.SerializeObject(newChatLogModel, Newtonsoft.Json.Formatting.Indented);
                             System.IO.File.WriteAllText(path, contents);
                         }
                         break;
